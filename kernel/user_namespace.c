@@ -20,6 +20,7 @@
 #include <linux/seq_file.h>
 #include <linux/fs.h>
 #include <linux/uaccess.h>
+#include <linux/nospec.h>
 #include <linux/ctype.h>
 #include <linux/projid.h>
 #include <linux/fs_struct.h>
@@ -648,15 +649,13 @@ static void *m_start(struct seq_file *seq, loff_t *ppos,
 {
 	loff_t pos = *ppos;
 	unsigned extents = map->nr_extents;
+
+	/* paired with smp_wmb in map_write */
 	smp_rmb();
 
-	if (pos >= extents)
-		return NULL;
-
 	if (extents <= UID_GID_MAP_MAX_BASE_EXTENTS)
-		return &map->extent[pos];
-
-	return &map->forward[pos];
+		return array_ptr(map->extent, pos, extents);
+	return array_ptr(map->forward, pos, extents);
 }
 
 static void *uid_m_start(struct seq_file *seq, loff_t *ppos)
