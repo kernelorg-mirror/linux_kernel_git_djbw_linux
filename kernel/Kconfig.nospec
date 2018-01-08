@@ -1,0 +1,46 @@
+# SPDX-License-Identifier: GPL-2.0
+
+menu "Speculative execution past bounds check"
+	depends on ARCH_HAS_IFENCE
+
+choice
+        prompt "Speculative execution past bounds check"
+        default SPECTRE1_MASK
+        help
+	  Select the default mechanism for guarding against kernel
+	  memory leaks via speculative execution past a boundary-check
+	  (Spectre variant1) . This choice determines the contents of
+	  the array_ptr() helper. Note, that vulnerable code paths need
+	  to be instrumented with this helper to be protected.
+
+config SPECTRE1_MASK
+	bool "mask"
+	help
+	  Provide an array_ptr() implementation that arranges for only
+	  safe speculative flows to be exposed to the compiler/cpu. It
+	  is preferred over "ifence" since it arranges for problematic
+	  speculation to be disabled without need of an instruction
+	  barrier.
+
+config SPECTRE1_IFENCE
+	bool "ifence"
+	depends on ARCH_HAS_IFENCE
+	help
+	  Provide a array_ptr() implementation that is specified by the
+	  cpu architecture to barrier all speculative execution.  Unless
+	  you have specific knowledge of the "mask" approach being
+	  unsuitable with a given compiler/cpu, select "mask".
+
+endchoice
+
+config SPECTRE1_DYNAMIC
+	bool "Support dynamic switching of speculative execution mitigation"
+	depends on ARCH_HAS_IFENCE
+	depends on JUMP_LABEL
+	help
+	  For architectures that support the 'ifence' mitigation, allow
+	  dynamic switching between it and the 'mask' approach. This supports
+	  evaluation or emergency switching.
+
+	  If unsure, say Y
+endmenu

@@ -570,6 +570,9 @@ config STACKDEPOT
 	bool
 	select STACKTRACE
 
+config ARCH_HAS_IFENCE
+	bool
+
 config SBITMAP
 	bool
 
