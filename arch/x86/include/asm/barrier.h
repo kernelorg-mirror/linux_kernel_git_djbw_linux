@@ -28,6 +28,48 @@
 #define ifence() alternative_2("", "mfence", X86_FEATURE_MFENCE_RDTSC, \
 				   "lfence", X86_FEATURE_LFENCE_RDTSC)
 
+/**
+ * ifence_array_ptr - Generate a pointer to an array element,
+ * ensuring the pointer is bounded under speculation.
+ *
+ * @arr: the base of the array
+ * @idx: the index of the element
+ * @sz: the number of elements in the array
+ *
+ * If @idx falls in the interval [0, @sz), returns the pointer to
+ * @arr[@idx], otherwise returns NULL.
+ */
+#define ifence_array_ptr(arr, idx, sz)					\
+({									\
+	typeof(*(arr)) *__arr = (arr), *__ret;				\
+	typeof(idx) __idx = (idx);					\
+	typeof(sz) __sz = (sz);						\
+									\
+	__ret = __idx < __sz ? __arr + __idx : NULL;			\
+	ifence();							\
+	__ret;								\
+})
+
+/**
+ * array_ptr_mask - generate a mask for array_ptr() that is ~0UL when
+ * the bounds check succeeds and 0 otherwise
+ */
+#define array_ptr_mask array_ptr_mask
+static inline unsigned long array_ptr_mask(unsigned long idx, unsigned long sz)
+{
+	unsigned long mask;
+
+	/*
+	 * mask = index - size, if that result is >= 0 then the index is
+	 * invalid and the mask is 0 else ~0
+	 */
+	asm ("cmpq %1,%2; sbbq %0,%0;"
+			:"=r" (mask)
+			:"r"(sz),"r" (idx)
+			:"cc");
+	return mask;
+}
+
 #ifdef CONFIG_X86_PPRO_FENCE
 #define dma_rmb()	rmb()
 #else
