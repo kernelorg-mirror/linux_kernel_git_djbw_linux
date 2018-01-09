@@ -40,6 +40,10 @@
 
 #endif /* CONFIG_X86_SMAP */
 
+#define ASM_IFENCE \
+	ALTERNATIVE_2 "", "mfence", X86_FEATURE_MFENCE_RDTSC, \
+			  "lfence", X86_FEATURE_LFENCE_RDTSC
+
 #else /* __ASSEMBLY__ */
 
 #include <asm/alternative.h>
