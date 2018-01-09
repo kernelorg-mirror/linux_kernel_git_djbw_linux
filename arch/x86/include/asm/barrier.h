@@ -24,6 +24,28 @@
 #define wmb()	asm volatile("sfence" ::: "memory")
 #endif
 
+/**
+ * array_idx_mask - generate a mask for array_idx() that is ~0UL when
+ * the bounds check succeeds and 0 otherwise
+ *
+ *     mask = 0 - (idx < sz);
+ */
+#define array_idx_mask array_idx_mask
+static inline unsigned long array_idx_mask(unsigned long idx, unsigned long sz)
+{
+	unsigned long mask;
+
+#ifdef CONFIG_X86_32
+	asm ("cmpl %1,%2; sbbl %0,%0;"
+#else
+	asm ("cmpq %1,%2; sbbq %0,%0;"
+#endif
+			:"=r" (mask)
+			:"r"(sz),"r" (idx)
+			:"cc");
+	return mask;
+}
+
 #ifdef CONFIG_X86_PPRO_FENCE
 #define dma_rmb()	rmb()
 #else
