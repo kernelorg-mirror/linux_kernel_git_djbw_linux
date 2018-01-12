@@ -41,6 +41,7 @@ ENTRY(__get_user_1)
 	cmp TASK_addr_limit(%_ASM_DX),%_ASM_AX
 	jae bad_get_user
 	ASM_STAC
+	ASM_IFENCE
 1:	movzbl (%_ASM_AX),%edx
 	xor %eax,%eax
 	ASM_CLAC
@@ -55,6 +56,7 @@ ENTRY(__get_user_2)
 	cmp TASK_addr_limit(%_ASM_DX),%_ASM_AX
 	jae bad_get_user
 	ASM_STAC
+	ASM_IFENCE
 2:	movzwl -1(%_ASM_AX),%edx
 	xor %eax,%eax
 	ASM_CLAC
@@ -69,6 +71,7 @@ ENTRY(__get_user_4)
 	cmp TASK_addr_limit(%_ASM_DX),%_ASM_AX
 	jae bad_get_user
 	ASM_STAC
+	ASM_IFENCE
 3:	movl -3(%_ASM_AX),%edx
 	xor %eax,%eax
 	ASM_CLAC
@@ -84,6 +87,7 @@ ENTRY(__get_user_8)
 	cmp TASK_addr_limit(%_ASM_DX),%_ASM_AX
 	jae bad_get_user
 	ASM_STAC
+	ASM_IFENCE
 4:	movq -7(%_ASM_AX),%rdx
 	xor %eax,%eax
 	ASM_CLAC
@@ -95,6 +99,7 @@ ENTRY(__get_user_8)
 	cmp TASK_addr_limit(%_ASM_DX),%_ASM_AX
 	jae bad_get_user_8
 	ASM_STAC
+	ASM_IFENCE
 4:	movl -7(%_ASM_AX),%edx
 5:	movl -3(%_ASM_AX),%ecx
 	xor %eax,%eax
