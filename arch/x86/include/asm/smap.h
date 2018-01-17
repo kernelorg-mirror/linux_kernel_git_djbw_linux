@@ -25,6 +25,23 @@
 
 #include <asm/alternative-asm.h>
 
+/*
+ * MASK_NOSPEC - sanitize the value of a user controlled value with
+ * respect to speculation
+ *
+ * In the get_user path once we have determined that the pointer is
+ * below the current address limit sanitize its value with respect to
+ * speculation. In the case when the pointer is above the address limit
+ * this directs the cpu to speculate with a NULL ptr rather than
+ * something targeting kernel memory.
+ *
+ * assumes CF is set from a previous 'cmp TASK_addr_limit, %ptr'
+ */
+.macro MASK_NOSPEC mask val
+	sbb \mask, \mask
+	and \mask, \val
+.endm
+
 #ifdef CONFIG_X86_SMAP
 
 #define ASM_CLAC \
