@@ -48,6 +48,10 @@ static inline unsigned long array_ptr_mask(unsigned long idx, unsigned long sz)
 	return mask;
 }
 
+/* prevent speculative execution past this barrier */
+#define ifence() alternative_2("", "mfence", X86_FEATURE_MFENCE_RDTSC, \
+				   "lfence", X86_FEATURE_LFENCE_RDTSC)
+
 #ifdef CONFIG_X86_PPRO_FENCE
 #define dma_rmb()	rmb()
 #else
