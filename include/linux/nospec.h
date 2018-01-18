@@ -41,4 +41,25 @@ static inline unsigned long array_ptr_mask(unsigned long idx, unsigned long sz)
 	__u._bit &= _mask;						\
 	__u._ptr;							\
 })
+
+/**
+ * array_idx - Generate a pointer to an array index, ensuring the
+ * pointer is bounded under speculation to NULL.
+ *
+ * @idx: the index of the element, must be less than LONG_MAX
+ * @sz: the number of elements in the array, must be less than LONG_MAX
+ *
+ * If @idx falls in the interval [0, @sz), returns &@idx otherwise
+ * returns NULL.
+ */
+#define array_idx(idx, sz)						\
+({									\
+	union { typeof((idx)) *_ptr; unsigned long _bit; } __u;		\
+	typeof(idx) *_i = &(idx);					\
+	unsigned long _mask = array_ptr_mask(*_i, (sz));		\
+									\
+	__u._ptr = _i;							\
+	__u._bit &= _mask;						\
+	__u._ptr;							\
+})
 #endif /* __NOSPEC_H__ */
