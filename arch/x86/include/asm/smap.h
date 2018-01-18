@@ -35,7 +35,14 @@
  * this directs the cpu to speculate with a NULL ptr rather than
  * something targeting kernel memory.
  *
- * assumes CF is set from a previous 'cmp TASK_addr_limit, %ptr'
+ * In the syscall entry path it is possible to speculate past the
+ * validation of the system call number. Use MASK_NOSPEC to sanitize the
+ * syscall array index to zero (sys_read) rather than an arbitrary
+ * target.
+ *
+ * assumes CF is set from a previous 'cmp' i.e.:
+ *     cmp TASK_addr_limit, %ptr
+ *     cmp __NR_syscall_max, %idx
  */
 .macro MASK_NOSPEC mask val
 	sbb \mask, \mask
